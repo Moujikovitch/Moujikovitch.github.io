@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>Predation</title>
+	 <link rel="stylesheet" type="text/css" href="style.css">
+</head>
+<body style="padding:0;margin:0;overflow:hidden">
+	<script src="testprocessing.js"></script>
+	<script type="text/processing" data-processing-target="mycanvas">
+	//float radius = 50.0;
+
+	int A; //variable angle
+	int nombre = round(random(10,40));//nombre de sphère
+	int ntri = round(random(1,5));//nombre de triangle
+	int[] angle = new int[nombre];//tableau contenant les angles directionnels des sphères
+	int[] virage = new int[nombre];//tableau comprenant la valeur de virage des sphères
+	float[][] e = new float[nombre][6]; //tableau comprenant les caractéristiques des sphères
+	float[][] t = new float[ntri][6]; //tableau comprenant les caractéristiques des triangles
+	int vit = random(1,5);//variable de vitesse
+	int rouge, bleu, vert;//variable pour les couleurs
+	int posX, posY, taille, vitesse, direction, rotation, nuance;
+
+	void setup()
+	{
+  		size( document.body.offsetWidth, document.body.offsetWidth/2 );
+  		strokeWeight( 1 );
+  		frameRate( 50 );
+			vit = random(1,10);
+		//génération thème couleur
+		rouge = random(0,205)+50;
+		bleu = random(0,255-rouge)+50;
+		vert = 255-bleu-rouge+50;
+		//triangles fond
+		for (int i=0; i<ntri; i++) {
+			t[i][0]=random(-30,width+30);
+			t[i][1]=random(-30,height+30);
+			t[i][2]=random(-30,width+30);
+			t[i][3]=random(-30,height+30);
+			t[i][4]=random(-30,width+30);
+			t[i][5]=random(-30,height+30);
+			t[i][6]=random(0,360);
+		};
+		//Paramètres sphères
+  		for (int j=0; j<nombre; j++) {
+   			virage[j]=random(0,10);//random virage
+  			angle[j]=random(0,360);//
+    		e[j][0]=random(0,width); // X
+    		e[j][1]=random(0,height); // Y
+    		e[j][2]=random(0,300/j)+20;//taille
+    		e[j][3]=(75-e[j][2]/2)/60*vit; // Speed
+    		e[j][4]=angle[j];//direction assignée
+    		e[j][5]=virage[j];//changement de direction
+    		e[j][6]=random(10,50);//nuance de bleu
+				if (e[j][3]<1) {
+					e[j][3]=1;
+				};
+    	}
+  	}
+  	void draw()
+  	{
+  		background((255-rouge)/5,(255-vert)/5,(255-bleu)/5);
+  		for(int i=0; i<ntri; i++) {
+  			fill(0,0,0);
+			noStroke();
+			triangle(t[i][0],t[i][1],t[i][2],t[i][3],t[i][4],t[i][5]);
+			for (int k=0; k<5; k++) {
+				At = t[i][6]*Math.PI/180;
+				if (k%2==0){
+					t[i][k]+=sin(At)/3;
+				} else {
+					t[i][k]+=cos(At)/3;
+				};
+			};
+		};
+  		for(int j=0; j<nombre; j++) {
+
+				posX = e[j][0];
+				posY = e[j][1];
+				taille = e[j][2];
+				vitesse = e[j][3];
+				direction = e[j][4];
+				rotation = e[j][5];
+				nuance = e[j][6];
+  			//cercles:
+  			fill(rouge, vert, bleu, 200);
+			noStroke();
+  			ellipse( e[j][0], e[j][1], e[j][2], e[j][2] );
+  			/*textSize(12);
+			fill(0,255,0);
+			text(round(e[j][2]),e[j][0],e[j][1]);*/
+  			//pulsion taille
+  			if (Math.round(frameCount/10)%2==0){
+				e[j][2]+=0.3;
+			} else {
+				e[j][2]-=0.3;
+			};
+			//Errance
+			rand = Math.random();
+			if (rand > 0.6) {
+				e[j][5]++;
+			}  else if (rand < 0.4) {
+				e[j][5]--;
+			};
+			if (e[j][5] < 3) {
+				e[j][4]-=vit;
+			} else if (e[j][5] > 7) {
+				e[j][4]+=vit;
+			};
+
+			//detection
+			boolean fuite = false; //prioriser la fuite
+			boolean attaque = false; //attaque
+			float predateur = 0; //enregistrer le predateur depuis la boucle
+			float proie = 0; //enregistrer la proie depuis la boucle
+			for (i=0;i<nombre;i++){
+				if (j != i) {
+					float Yd = e[i][1]-e[j][1]; //distance Y
+					float Xd = e[i][0]-e[j][0]; //distance X
+					if (abs(Xd)<70 && abs(Yd)<70) {
+						float Z = sqrt(pow(Yd,2)+pow(Xd,2)); //hypothénuse
+						float ciblerad = atan((Xd/Z)/(Yd/Z)); //angle radiant
+						float cibledeg = ciblerad*180/Math.PI; //angle en degré
+						//positionner angle dans l'hemisphère
+						if (Yd<0){
+							cibledeg+=180;
+						};
+						//définir fuite ou attaque
+						if (e[j][2]>e[i][2]){
+							attaque = true;
+							proie = cibledeg;
+							stroke(255-rouge,255-vert,255-bleu);
+							line(e[i][0],e[i][1],e[j][0],e[j][1]);
+						} else {
+							fuite = true;
+							predateur = cibledeg+180;
+							if (predateur>360){
+								predateur-=360;
+							};
+							line(e[i][0],e[i][1],e[j][0],e[j][1]);
+						};
+
+					};
+				};
+			};
+			//se diriger vers la cible/fuite
+			if (fuite == true) {
+				//e[j][4] = predateur;
+				float angleApproche = predateur-e[j][4];
+				if (abs(angleApproche)>25 || abs(angleApproche)<300){
+						fill(10,10,255);
+						noStroke();
+						rectMode(CENTER);
+						rect(10*j,20,10,5);
+						textSize(12);
+						fill(0,255,0);
+						text(angleApproche,e[j][0],e[j][1]);
+					if (angleApproche<=180 || angleApproche > -180){
+						e[j][4] -= vit;
+						fill(10,255,10);
+						noStroke();
+						rectMode(CENTER);
+						rect(10*j,15,10,5);
+					} else if (angleApproche>180 || angleApproche<= -180 ) {
+						e[j][4] += vit;
+						fill(255,10,10);
+						noStroke();
+						rectMode(CENTER);
+						rect(10*j,10,5,10);
+					};
+				};
+			} else if (attaque == true) {
+				e[j][4] = proie;
+			};
+  			//Evitement des bords
+			if (e[j][1]<30 && e[j][4] > 45 && e[j][4] < 315) {
+				e[j][5]=5;
+				if (e[j][4] > 179){
+					e[j][4]+=e[j][3];
+				}
+				if (e[j][4] < 180){
+					e[j][4]-=e[j][3];
+				};
+			};
+			if (e[j][1]>height-30 && e[j][4] > 225 || e[j][1]>height-30 && e[j][4] < 135 ) {
+				e[j][5]=5;
+				if (e[j][4] > -1 && e[j][4] < 135){
+					e[j][4]+=e[j][3];
+				}
+				if (e[j][4] < 361 && e[j][4] > 225){
+					e[j][4]-=e[j][3];
+				};
+			};
+			if (e[j][0]<30 && e[j][4] < 360 && e[j][4] > 135 || e[j][0]<30 && e[j][4] < 45 ) {
+				e[j][5]=5;
+				if (e[j][4] > 269 || e[j][4] < 45){
+					e[j][4]+=e[j][3];
+				}
+				if (e[j][4] < 270 && e[j][4] > 45){
+					e[j][4]-=e[j][3];
+				};
+			};
+			if (e[j][0]>width-30 && e[j][4] > 0 && e[j][4] < 225 || e[j][0]>width-30 && e[j][4] > 315) {
+				e[j][5]=5;
+				if (e[j][4] > 89 && e[j][4] < 315){
+					e[j][4]+=e[j][3];
+				}
+				if (e[j][4] < 90 || e[j][4] > 315){
+					e[j][4]-=e[j][3];
+				};
+			};
+			//débuggeur coin
+			if (e[j][0]<20 && e[j][1]<20) {
+				e[j][4] = 45;
+			};
+			if (e[j][0]>width-30 && e[j][1]<20) {
+				e[j][4] = 315;
+			};
+			if (e[j][0]<20 && e[j][1]>height-30) {
+				e[j][4] = 135;
+			};
+			if (e[j][0]>width-30 && e[j][1]>height-30) {
+				e[j][4] = 225;
+			};
+			//virage limite
+			if (e[j][5] < 0) {
+				e[j][5] = 0;
+			} else if (e[j][5] > 10) {
+				e[j][5] = 10;
+			};
+			//angle limite
+			if (e[j][4] < 0) {
+				e[j][4] += 360;
+			};
+			if (e[j][4] > 360) {
+				e[j][4] -= 360;
+			};
+			//bord
+			if (e[j][0]<0){
+				e[j][0]=0;
+			};
+			if (e[j][0]>width){
+				e[j][0]=width;
+			};
+			if (e[j][1]<0){
+				e[j][1]=0;
+			};
+			if (e[j][1]>height){
+				e[j][1]=height;
+			};
+			//déplacement final
+			A = e[j][4]*Math.PI/180
+				e[j][0]+=sin(A)*e[j][3];
+				e[j][1]+=cos(A)*e[j][3];
+				//textSize(12);
+				//fill(0,255,0);
+				//text(e[j][4],e[j][0],e[j][1]);
+  		};
+			if (frameCount%400==0){
+				setup();
+			};
+	}
+	</script>
+<canvas id="mycanvas" style="float:left;position:absolute;"></canvas>
+<script type="text/processing" data-processing-target="mycanvas2">
+  float Xresult = 0;
+  float Yresult = 0;
+  int angle = 0;
+  int anglerad = 0;
+
+	void setup()
+	 {
+  		size( 150, 150 );
+  		strokeWeight( 1 );
+  		frameRate( 1 );
+  	}
+  	void draw()
+  	{
+      //REPERE
+  		background(240);
+  		noFill();
+  		ellipse(height/2,width/2,height/2,width/2);
+  		line(height-height/5,height/2,height/5,height/2);
+      line(width/2,width-width/5,width/2,width/5);
+      //POINT CIBLE
+      int Xc = random(0,width);
+      int Yc = random(0,height);
+      line(Xc+20,Yc,Xc-20,Yc);
+      line(Xc,Yc+20,Xc,Yc-20);
+      //DISTANCE
+      int Xd = Xc-width/2;
+      int Yd = Yc-height/2;
+      int Hd = sqrt(pow(Xd,2)+pow(Yd,2));
+      //ANGLE EN RADIANT
+      anglerad = atan((Xd/Hd)/(Yd/Hd));
+      //angle en degrés
+      angledeg = anglerad*180/Math.PI;
+      //position hemisphère
+      int anglefin = 0;
+      if (Yd < 0){
+        anglefin = 180+angledeg;
+      } else {
+        anglefin = angledeg;
+      }
+
+      //reconversion en radiant
+      int angleradfin = anglefin*Math.PI/180;
+      //DIRECTION X/Y
+      Xresult = width/2+sin(angleradfin)*100;
+      Yresult = height/2+cos(angleradfin)*100;
+      //angle fuite
+      int anglefuite = anglefin+180;
+      if (anglefuite > 360) {
+        anglefuite -+360;
+      }
+      int angleradfuite = anglefuite*Math.PI/180;
+      Xfuite = width/2+sin(angleradfuite)*100;
+      Yfuite = height/2+cos(angleradfuite)*100;
+      line(width/2,height/2,Xresult,Yresult);
+      line(width/2,height/2,Xfuite,Yfuite);
+      textSize(12);
+      fill(0,0,0);
+      text(angledeg,Xresult+10,Yresult+10);
+      text("xd"+round(Xd)+" "+"yd"+round(Yd),Xc+10,Yc+10);
+	}
+	</script>
+	<p style="font-family:Arial;color:black;width:700px;padding:30px;position:absolute;bottom:0px"><strong>Composition</strong><br><br>Ces formes géométriques sont animés par un algorithme. Les triangles se déplacent de manière linéaire alors que les cercles ont un comportement semblable à celui de bactérie : les grands cerclent attaquent les petits, les petits fuient les grands.</p>
+<canvas id="mycanvas2" style="float:right;position:absolute;bottom:0px;right:0px;"></canvas>
+</body>
+</html>
