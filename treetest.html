@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title></title>
+  </head>
+  <body>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r71/three.js">
+    </script>
+    <script>
+
+    var scene, camera, renderer;
+    var geometry, geometry2, material, mesh;
+    var initialPosX = [];
+    var initialPosY = [];
+    var initialPosZ = [];
+    var time = 0;
+
+init();
+animate();
+
+function init() {
+
+  scene = new THREE.Scene();
+
+  camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 1, 10000 );
+  camera.position.z = 1000;
+
+  geometry = new THREE.BoxGeometry( 200, 200, 200 );
+  material = new THREE.MeshLambertMaterial( { color: 0xffffff, shading: THREE.SmoothShading } );
+  material2 = new THREE.MeshBasicMaterial( { color: 0xffffff, wireframe: true } );
+
+    light = new THREE.PointLight(0x0040ff, 100, 10000 );
+    light.position.x = 100;
+    light.position.y = 100;
+    light.position.z = 10000;
+    scene.add( light );
+    light2 = new THREE.PointLight("rgb(250,0,150)", 100, 10000 );
+    light2.position.x = -100;
+    light2.position.y = -100;
+    light2.position.z = -9000;
+    scene.add( light2 );
+
+
+   geometry2 = new THREE.Geometry();
+    for (i = 0; i < 100; i++) {
+      initialPosX[i] = Math.random()*i*10-300;
+      initialPosY[i] = Math.random()*i*10-300;
+      initialPosZ[i] = Math.random()*i*10-300;
+      geometry2.vertices.push(
+	       new THREE.Vector3( initialPosX[i],  initialPosY[i], initialPosZ[i] )
+      );
+      geometry2.dynamic = true;
+      geometry2.verticesNeedUpdate = true;
+    };
+    for (i = 0; i < 98; i++) {
+      geometry2.faces.push( new THREE.Face3( i+1, i+2, i ) );
+    };
+    geometry2.computeFaceNormals();
+
+    mesh2 = new THREE.Mesh(geometry2, material);
+    mesh = new THREE.Mesh( geometry, material );
+    scene.add( mesh2 );
+
+    renderer = new THREE.WebGLRenderer();
+    renderer.setSize( window.innerWidth, window.innerHeight );
+
+    document.body.appendChild( renderer.domElement );
+
+}
+
+function animate() {
+  time ++;
+  requestAnimationFrame( animate );
+  for (i = 0 ; i < 100; i++) {
+    mesh2.geometry.vertices[i].x += Math.sin(time/i)*10;
+    mesh2.geometry.vertices[i].y += Math.sin(time/i)*10;
+    mesh2.geometry.vertices[i].z += Math.sin(time/i)*10;
+    geometry2.verticesNeedUpdate = true;
+  };
+  mesh2.rotation.x += 0.01;
+  mesh2.rotation.y += 0.02;
+  camera.position.y = Math.sin(time/100)*100;
+  renderer.render( scene, camera );
+
+}
+
+    </script>
+  </body>
+</html>
