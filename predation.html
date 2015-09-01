@@ -11,13 +11,13 @@
 	//float radius = 50.0;
 
 	int A; //variable angle
-	int nombre = round(random(10,40));//nombre de sphère
+	int nombre = round(random(60,60));//nombre de sphère
 	int ntri = round(random(1,5));//nombre de triangle
 	int[] angle = new int[nombre];//tableau contenant les angles directionnels des sphères
 	int[] virage = new int[nombre];//tableau comprenant la valeur de virage des sphères
 	float[][] e = new float[nombre][6]; //tableau comprenant les caractéristiques des sphères
 	float[][] t = new float[ntri][6]; //tableau comprenant les caractéristiques des triangles
-	int vit = random(1,5);//variable de vitesse
+	float vit = 1;//variable de vitesse
 	int rouge, bleu, vert;//variable pour les couleurs
 	int posX, posY, taille, vitesse, direction, rotation, nuance;
 
@@ -47,8 +47,8 @@
   			angle[j]=random(0,360);//
     		e[j][0]=random(0,width); // X
     		e[j][1]=random(0,height); // Y
-    		e[j][2]=random(0,300/j)+20;//taille
-    		e[j][3]=(75-e[j][2]/2)/60*vit; // Speed
+    		e[j][2]=random(50,300/j);//taille
+    		e[j][3]=1; // Speed
     		e[j][4]=angle[j];//direction assignée
     		e[j][5]=virage[j];//changement de direction
     		e[j][6]=random(10,50);//nuance de bleu
@@ -146,8 +146,9 @@
 			//se diriger vers la cible/fuite
 			if (fuite == true) {
 				//e[j][4] = predateur;
+				e[j][5] = 5;
 				float angleApproche = predateur-e[j][4];
-				if (abs(angleApproche)>25 || abs(angleApproche)<300){
+				if (abs(angleApproche)>45){
 						fill(10,10,255);
 						noStroke();
 						rectMode(CENTER);
@@ -155,22 +156,54 @@
 						textSize(12);
 						fill(0,255,0);
 						text(angleApproche,e[j][0],e[j][1]);
-					if (angleApproche<=180 || angleApproche > -180){
-						e[j][4] -= vit;
+						fill(255,0,0);
+						text(e[j][4],e[j][0]+10,e[j][1]+10);
+					if (angleApproche<=180 && angleApproche > 45){
+						e[j][4] += 0.5;
 						fill(10,255,10);
 						noStroke();
 						rectMode(CENTER);
 						rect(10*j,15,10,5);
-					} else if (angleApproche>180 || angleApproche<= -180 ) {
-						e[j][4] += vit;
+						rect(e[j][0],e[j][1],10,10);
+					} else if ((angleApproche>-135 && angleApproche<-45) || (angleApproche>= 0 && angleApproche < 45) ) {
+						e[j][4] -= 0.5;
 						fill(255,10,10);
 						noStroke();
 						rectMode(CENTER);
 						rect(10*j,10,5,10);
+						rect(e[j][0],e[j][1],10,10);
 					};
 				};
 			} else if (attaque == true) {
-				e[j][4] = proie;
+				e[j][5] = 5;
+				//e[j][4] = proie;
+				float angleApproche = proie-e[j][4];
+				if (abs(angleApproche)>1){
+						fill(10,255,255);
+						noStroke();
+						rectMode(CENTER);
+						rect(10*j,50,10,5);
+						textSize(12);
+						fill(0,255,0);
+						text(angleApproche,e[j][0],e[j][1]);
+						fill(255,0,0);
+						text(e[j][4],e[j][0]+10,e[j][1]+10);
+					if (angleApproche<=180 && angleApproche > 1){
+						e[j][4] += 10;
+						fill(255,255,10);
+						noStroke();
+						rectMode(CENTER);
+						rect(10*j,45,10,5);
+						rect(e[j][0],e[j][1],10,10);
+					} else if ((angleApproche>-135 && angleApproche<-1) || (angleApproche>= 0 && angleApproche < 45) ) {
+						e[j][4] -= 10;
+						fill(255,10,255);
+						noStroke();
+						rectMode(CENTER);
+						rect(10*j,35,5,10);
+						rect(e[j][0],e[j][1],10,10);
+					};
+				};
 			};
   			//Evitement des bords
 			if (e[j][1]<30 && e[j][4] > 45 && e[j][4] < 315) {
