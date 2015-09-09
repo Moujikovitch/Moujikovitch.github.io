@@ -182,3 +182,31 @@ function synonym(syn) {
   var result = N("word")[recherche(syn)].getElementsByTagName("synonym");
   return result;
 };
+//colorer body de manière dynamique
+function rainbowBody() {
+    document.addEventListener("mousemove", function(e){
+    this.varY = (e.clientY/document.body.offsetHeight)*255;
+    this.varX = (e.clientX/document.body.offsetWidth)*255;
+    document.body.style.backgroundColor = "rgb("+Math.round(this.varY).toString()+","+Math.round(this.varX).toString()+","+(255-(Math.round(this.varY/2)+Math.round(this.varX/2))).toString()+")";
+  });
+};
+//Générer poisson dans une div
+function virtualAquarium(conteneur,nombre) {
+  for(i=0;i<nombre;i++) {
+    var poisson = document.createElement("div");
+      poisson.className = "poisson";
+      poisson.style.width = size(intRandom(10,30),"px");
+      poisson.style.height = size(parseInt(poisson.style.width)/3,"px");
+      poisson.stimulation = floatRandom(1,10);
+      poisson.vitesse = 0;
+      poisson.direction = 0;
+      poisson.style.position = "absolute";
+      poisson.style.top = size(intRandom(1,100),"px");
+      poisson.style.left = size(intRandom(-100,100),"px");
+      poisson.style.backgroundColor = "blue";
+      I(conteneur).insertBefore(poisson,null);
+  };
+  var frameAqua = setInterval(function(){
+
+  },40);
+};
