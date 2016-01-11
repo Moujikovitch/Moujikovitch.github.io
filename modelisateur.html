@@ -23,6 +23,7 @@
     camera = new THREE.PerspectiveCamera( 75, window.innerWidth/window.innerHeight, 0.1, 1000 );
     renderer = new THREE.WebGLRenderer();
     renderer.setSize( window.innerWidth, window.innerHeight );
+    renderer.setClearColor( "rgb(100,45,75)", 1 );
     document.body.appendChild( renderer.domElement );
 
     //MATERIAUX
@@ -33,8 +34,8 @@
     //plan maillé=====================================
     sizeX = 100; //taille
     sizeY = 50;
-    line = 5; //définition
-    col = 5;
+    line = 50; //définition
+    col = 50;
     vertsTable = []; //table des points
     var vertsX, vertsY, vertsZ;
     vertsZ = 0;
@@ -43,7 +44,7 @@
       vertsY = (i*(sizeY/col))-(sizeY/2);
       for (j = 0; j < line; j++) {
         vertsX = (j*(sizeX/line))-(sizeX/2);
-        vertsTable.push(new THREE.Vector3(vertsX+Math.random()*15,vertsY+Math.random()*10,Math.sin(Math.random()*i)*10));
+        vertsTable.push(new THREE.Vector3(vertsX+Math.random()*2,vertsY+Math.random()*1,Math.sin(Math.random()*i)*1));
       };
     };
     //ajout des points à la géométrie
@@ -69,7 +70,10 @@
     light.position.y = 500;
     light.position.z = 100;
     light.castShadow = true;
+    //lumière ambiante
     ambiant = new THREE.AmbientLight("rgb(50,0,25)");
+    //Brouillard
+    scene.fog = new THREE.Fog("rgb(100,40,75)", 0, 300);
 
     //====================================================
 
@@ -84,7 +88,7 @@
     scene.add( light );
     scene.add( ambiant );
     scene.add( meshPlane );
-    scene.fog = new THREE.Fog(0xffffff, 10, 500);
+
 
     camera.position.z = 100;
 }
