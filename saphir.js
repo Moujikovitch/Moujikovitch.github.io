@@ -92,9 +92,13 @@ function DOM() {
     return this.scan;
   };
 };
-//convertir nombre en mesure HTML
+//convertir nombre en mesure CSS
 function size(n,m){
   return n.toString()+m;
+};
+//définir une couleur RVB
+function RVB(r,v,b){
+ return "rgb("+r.toString()+","+v.toString()+","+b.toString()+")";
 };
 //augmenter une valeur CSS
 function incr(cible,nombre){
